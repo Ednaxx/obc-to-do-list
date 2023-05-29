@@ -13,6 +13,14 @@ require('./config/database');
 const app = express();
 const route = 3000;
 
+// try to parse received json and put on requisition's body object
+
+const methodOverride = require('method-override');
+
+app.use(express.json());
+app.use(express.urlencoded({extended: true}));
+app.use(methodOverride('_method', {methods: ["GET", "POST"]}));
+
 // setting views directory and engine
 
 app.set('views', path.join(__dirname, 'src/views'));

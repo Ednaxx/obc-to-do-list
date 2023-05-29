@@ -1,16 +1,9 @@
 const express = require('express');
 const Checklist = require('../model/checklist');
-const methodOverride = require('method-override');
 
 // creating router
 
 const router = express.Router();
-
-// try to parse received json and put on requisition's body object
-
-router.use(express.json());
-router.use(express.urlencoded({extended: true}));
-router.use(methodOverride('_method'));
 
 // GET all method
 
@@ -33,6 +26,16 @@ router.get('/new', async (req, res) => {
         res.status(500).render('pages/error', { error: err });
     }
 });
+
+router.get("/:id/edit", async (req, res) => {
+    try {
+        let checklist = await Checklist.findById(req.params.id);
+        res.status(200).render('checklists/edit', { checklist: checklist })
+    }
+    catch (err) {
+        res.status(500).render('pages/error', { error: err });
+    }
+})
 
 // GET by id method
 
@@ -64,13 +67,16 @@ router.post('/', async (req, res) => {
 // PUT method
 
 router.put('/:id', async (req, res) => {
+    let { name } = req.body.checklist;
+    let checklist = await Checklist.findById(req.params.id);
+
     try {
-        let name = req.body.name;
-        let checklist = await Checklist.findByIdAndUpdate(req.params.id, {name}, {new: true});
-        res.status(200).json(checklist);
+        await checklist.update({ name });
+        res.redirect('/checklists')
     }
     catch(err) {
-        res.status(422).json(err);
+        let errors = err.error;
+        res.status(422).render('checklists/edit', {checklist: {...checklist, errors}});
     }
 })
 
@@ -78,12 +84,11 @@ router.put('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
     try {
-        let name = req.body.name;
         let checklist = await Checklist.findByIdAndRemove(req.params.id);
-        res.status(200).json(checklist);
+        res.redirect('/checklists');
     }
     catch(err) {
-        res.status(422).json(err);
+        res.status(500).render('pages/error', { error: err });
     }
 })
 
