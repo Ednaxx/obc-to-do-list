@@ -13,6 +13,7 @@ router.get('/', async (req, res) => {
         res.status(200).render('checklists/index', { checklists: checklists });
     }
     catch(err) {
+        console.log(err);
         res.status(500).render('pages/error', { error: err });
     }
 });
@@ -23,6 +24,7 @@ router.get('/new', async (req, res) => {
         res.status(200).render('checklists/new', { checklist: checklist });
     }
     catch(err) {
+        console.log(err);
         res.status(500).render('pages/error', { error: err });
     }
 });
@@ -33,6 +35,7 @@ router.get("/:id/edit", async (req, res) => {
         res.status(200).render('checklists/edit', { checklist: checklist })
     }
     catch (err) {
+        console.log(err);
         res.status(500).render('pages/error', { error: err });
     }
 })
@@ -41,10 +44,11 @@ router.get("/:id/edit", async (req, res) => {
 
 router.get('/:id', async (req, res) => {
     try {
-        let checklist = await Checklist.findById(req.params.id);
+        let checklist = await Checklist.findById(req.params.id).populate('tasks');
         res.status(200).render('checklists/show', { checklist: checklist });
     }
     catch(err) {
+        console.log(err);
         res.status(404).render('pages/error', { error: err });
     }
 })
@@ -60,6 +64,7 @@ router.post('/', async (req, res) => {
         res.redirect('/checklists');
     }
     catch(err) {
+        console.log(err);
         res.status(422).render('checklists/new', {checklists: { ...checklist, err }});
     }
 });
@@ -68,13 +73,13 @@ router.post('/', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
     let { name } = req.body.checklist;
-    let checklist = await Checklist.findById(req.params.id);
 
     try {
-        await checklist.update({ name });
+        await Checklist.findOneAndUpdate({_id: req.params.id}, {name});
         res.redirect('/checklists')
     }
     catch(err) {
+        console.log(err);
         let errors = err.error;
         res.status(422).render('checklists/edit', {checklist: {...checklist, errors}});
     }
@@ -84,10 +89,11 @@ router.put('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
     try {
-        let checklist = await Checklist.findByIdAndRemove(req.params.id);
+        await Checklist.findByIdAndRemove(req.params.id);
         res.redirect('/checklists');
     }
     catch(err) {
+        console.log(err);
         res.status(500).render('pages/error', { error: err });
     }
 })

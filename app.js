@@ -1,9 +1,11 @@
 const express = require('express');
 const path = require('path');
 
+
 // importing routes
 
 const checklistsRouter = require('./src/routes/checklists');
+const tasksRouter = require('./src/routes/tasks');
 const rootRouter = require('./src/routes/index');
 
 // db server
@@ -33,6 +35,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 // defining routes
 
 app.use('/checklists', checklistsRouter);
+app.use('/checklists', tasksRouter.checklistDependent)
+app.use('/tasks', tasksRouter.simple)
 app.use('/', rootRouter);
 
 
